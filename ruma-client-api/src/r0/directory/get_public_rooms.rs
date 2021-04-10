@@ -71,18 +71,18 @@ impl Response {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
-
     use js_int::uint;
-    use ruma_api::OutgoingRequest as _;
 
     #[cfg(feature = "client")]
     #[test]
     fn construct_request_from_refs() {
-        let req: http::Request<Vec<u8>> = super::Request {
+        use ruma_api::OutgoingRequest as _;
+        use ruma_identifiers::server_name;
+
+        let req = super::Request {
             limit: Some(uint!(10)),
             since: Some("hello"),
-            server: Some("address".try_into().unwrap()),
+            server: Some(&server_name!("test.tld")),
         }
         .try_into_http_request("https://homeserver.tld", Some("auth_tok"))
         .unwrap();
@@ -93,19 +93,21 @@ mod tests {
         assert_eq!(uri.path(), "/_matrix/client/r0/publicRooms");
         assert!(query.contains("since=hello"));
         assert!(query.contains("limit=10"));
-        assert!(query.contains("server=address"));
+        assert!(query.contains("server=test.tld"));
     }
 
     #[cfg(feature = "server")]
     #[test]
     fn construct_response_from_refs() {
-        let res: http::Response<Vec<u8>> = super::Response {
+        use ruma_api::OutgoingResponse as _;
+
+        let res = super::Response {
             chunk: vec![],
             next_batch: Some("next_batch_token".into()),
             prev_batch: Some("prev_batch_token".into()),
             total_room_count_estimate: Some(uint!(10)),
         }
-        .try_into()
+        .try_into_http_response()
         .unwrap();
 
         assert_eq!(
