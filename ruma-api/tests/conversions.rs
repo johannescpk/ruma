@@ -6,7 +6,7 @@ ruma_api! {
         description: "Does something.",
         method: POST,
         name: "my_endpoint",
-        path: "/_matrix/foo/:bar/:baz",
+        path: "/_matrix/foo/:bar/:user",
         rate_limited: false,
         authentication: None,
     }
@@ -22,7 +22,7 @@ ruma_api! {
         #[ruma_api(path)]
         pub bar: String,
         #[ruma_api(path)]
-        pub baz: UserId,
+        pub user: UserId,
     }
 
     response: {
@@ -42,7 +42,7 @@ fn request_serde() -> Result<(), Box<dyn std::error::Error + 'static>> {
         q1: "query_param_special_chars %/&@!".to_owned(),
         q2: 55,
         bar: "barVal".to_owned(),
-        baz: user_id!("@bazme:ruma.io"),
+        user: user_id!("@bazme:ruma.io"),
     };
 
     let http_req = req.clone().try_into_http_request("https://homeserver.tld", None)?;
@@ -53,7 +53,7 @@ fn request_serde() -> Result<(), Box<dyn std::error::Error + 'static>> {
     assert_eq!(req.q1, req2.q1);
     assert_eq!(req.q2, req2.q2);
     assert_eq!(req.bar, req2.bar);
-    assert_eq!(req.baz, req2.baz);
+    assert_eq!(req.user, req2.user);
 
     Ok(())
 }
